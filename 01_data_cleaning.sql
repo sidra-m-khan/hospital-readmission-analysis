@@ -1,42 +1,57 @@
-
 -- =========================================
--- Hospital Readmission Analysis
--- Step 1: Data Cleaning
+-- Project: Hospital Readmission Analysis (Diabetes Dataset)
+-- File: 01_data_cleaning.sql
 -- Author: Sidra Khan
+-- Description: Clean and preprocess diabetic hospital dataset for analysis
 -- =========================================
 
 
-
-
-
+-- =========================================
+-- Section: Create Working Table
+-- Description: Create a working copy of the original dataset for cleaning
+-- =========================================
 
 SELECT *
 INTO diabetes_clean
 FROM diabetic_data;
 
-
+-- =========================================
+-- Section: Identify Duplicate Patients
+-- Description: Find duplicate patient records by patient number
+-- =========================================
 
 SELECT patient_nbr, COUNT(*) AS duplicate
 FROM diabetes_clean
 GROUP BY patient_nbr
 HAVING COUNT(*) > 1;
 
+-- =========================================
+-- Section: Remove Duplicate Records
+-- Description: Keep only the first encounter for each patient to remove duplicates
+-- ========================================= 
 
 DELETE FROM diabetes_clean
 WHERE patient_nbr NOT IN (
     SELECT MIN(patient_nbr)
     FROM diabetes_clean
-    GROUP BY patient_nbr, encounter_id
-);
+    GROUP BY patient_nbr, encounter_id);
 
 
-
+-- =========================================
+-- Section: Count Total and Unique Rows
+-- Description: Check number of total rows and unique patients after cleaning
+-- =========================================
 
 SELECT 
     COUNT(*) AS Total_Rows,
     COUNT(DISTINCT patient_nbr ) AS Unique_Values
 FROM diabetes_clean;
 
+
+-- =========================================
+-- Section: Identify Duplicate Encounters
+-- Description: Find patient encounters that are duplicated
+-- =========================================
 
 SELECT 
     patient_nbr,
@@ -46,11 +61,23 @@ FROM diabetes_clean
 GROUP BY patient_nbr, encounter_id
 HAVING COUNT(*) > 1;
 
+
+-- =========================================
+-- Section: Remove Invalid Gender Values
+-- Description: Delete records with 'Unknown/Invalid' gender
+-- =========================================
+
 SELECT DISTINCT gender
 FROM diabetes_clean;
 
 DELETE FROM diabetes_clean
 WHERE gender = 'Unknown/Invalid';
+
+
+-- =========================================
+-- Section: Add Binary Readmission Column
+-- Description: Create readmit_30 column for patients readmitted within 30 days
+-- =========================================
 
 ALTER TABLE diabetes_clean
 ADD readmit_30 BIT;
@@ -62,6 +89,10 @@ SET readmit_30 =
         ELSE 0
     END;
 
+-- =========================================
+-- Section: Clean A1C Results
+-- Description: Replace 'None' with NULL and create A1C_flag column for risk categorization
+-- =========================================
 
 UPDATE diabetes_clean
 SET A1Cresult = NULL
@@ -80,6 +111,10 @@ SET A1C_flag =
         ELSE NULL
     END;
 
+-- =========================================
+-- Section: Add Age Midpoint Column
+-- Description: Convert age ranges to numeric midpoint values for analysis
+-- =========================================
 
     ALTER TABLE diabetes_clean
 ADD age_mid INT;
@@ -100,6 +135,11 @@ SET age_mid =
     END;
 
 
+-- =========================================
+-- Section: Create Age Group Column
+-- Description: Categorize patients into Young, Middle-aged, Older
+-- =========================================
+
 ALTER TABLE diabetes_clean
 ADD age_group VARCHAR(20);
 
@@ -110,6 +150,11 @@ SET age_group =
         WHEN age_mid < 65 THEN 'Middle-aged'
         ELSE 'Older'
     END;
+
+-- =========================================
+-- Section: Flag High-Risk Patients
+-- Description: Identify patients with uncontrolled A1C and insulin therapy
+-- =========================================
 
 ALTER TABLE diabetes_clean
 ADD high_risk BIT;
@@ -123,6 +168,13 @@ SET high_risk =
         ELSE 0
     END;
 
+
+
+-- =========================================
+-- Section: Check Min/Max of Continuous Columns
+-- Description: Explore time_in_hospital and num_medications ranges
+-- =========================================
+
 SELECT patient_nbr, MIN(time_in_hospital), MAX(time_in_hospital)
 FROM diabetes_clean
 GROUP BY patient_nbr ;
@@ -131,12 +183,21 @@ SELECT patient_nbr, MIN(num_medications), MAX(num_medications)
 FROM diabetes_clean
 GROUP BY patient_nbr;
 
+
+-- =========================================
+-- Section: Check Null Values
+-- Description: Count rows with null values for key columns
+-- =========================================
+
 SELECT COUNT(*) FROM diabetes_clean;
 SELECT COUNT(*) FROM diabetes_clean WHERE readmit_30 IS NULL;
 SELECT COUNT(*) FROM diabetes_clean WHERE age_mid IS NULL;
 
 
-
+-- =========================================
+-- Section: Replace Invalid Values in Categorical Columns
+-- Description: Replace '?' with NULL for race, weight, payer_code, medical_specialty
+-- =========================================
 
 SELECT COUNT(*) 
 FROM diabetes_clean
@@ -154,8 +215,12 @@ WHERE
     OR payer_code = '?' 
     OR medical_specialty = '?';
 
-    -------------------
+    -- =========================================
+-- Section: Replace NULL Medical Specialty
+-- Description: Fill missing medical_specialty values with 'Unknown'
+-- =========================================
 
     UPDATE diabetes_clean
 SET medical_specialty = 'Unknown'
 WHERE medical_specialty IS NULL;
+
