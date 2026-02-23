@@ -1,16 +1,16 @@
 -- =========================================
--- Hospital Readmission Analysis
--- Step 3: Readmission Insights
+-- Project: Hospital Readmission Analysis (Diabetes Dataset)
+-- File: 03_business_analysis.sql
+-- Author: Sidra Khan
 -- =========================================
 
 
+-- -- =========================================
+-- Section: Readmission Rate by Age Group
+-- Description: Calculate total patients and readmission rates for each age group
+-- Purpose: Identify age groups at higher risk of30- days  hospital readmission
+-- =========================================
 
---5 clinical/business questions--
-
---1. Which patient age groups have the highest 30-day readmission rates?
--- Calculate readmission rate according to age groups
-
---  Age group vs readmission rate:--
 
 SELECT  age_group, 
     COUNT(*) AS Total_Patients,
@@ -21,10 +21,12 @@ GROUP BY age_group,
 ORDER BY Readmit_Rate_Percent DESC;
 
 
--- 2. Does uncontrolled A1C result increase readmission risk?--
--- Identify A1C result affects readmission risk
+-- =========================================
+-- Section: Readmission Risk by Uncontrolled A1C
+-- Description: Analyze whether patients with high/uncontrolled A1C values have higher readmission risk
+-- Purpose: Identify if poor blood sugar control contributes to readmissions
+-- =========================================
 
--- A1C result vs readmission rate:--
 
 SELECT A1C_FLAG,
     COUNT(*) AS Total_Patients,
@@ -36,10 +38,11 @@ ORDER BY Readmit_Rate_Percent DESC;
 
 
 
--- 3.Which racial/ethnic group has the highest incidence of insulin usage?--
--- Comapare which racial/ethnic group used more Insulin
-
---Race vs insulin usage--
+-- =========================================
+-- Section: Insulin Usage by Racial/Ethnic Group
+-- Description: Compare insulin usage rates among different racial and ethnic groups
+-- Purpose: Identify which groups use more insulin and potential disparities in care
+-- =========================================
 
 SELECT
     race,
@@ -50,10 +53,11 @@ GROUP BY race, insulin
 ORDER BY race, insulin DESC;
 
 
--- 4.Which hospital departments have the highest readmission rates?--
--- Compare different departments for readmission rates
-
---  Department vs readmission rate--
+-- =========================================
+-- Section: Readmission Rates by Hospital Department
+-- Description: Analyze readmission rates across hospital departments
+-- Purpose: Identify departments with highest readmission rates to focus interventions
+-- =========================================
 
 SELECT
     medical_specialty,
@@ -66,10 +70,11 @@ HAVING COUNT(*) > 50    -- remove very small departments (important!)
 ORDER BY Readmit_Rate_Percent DESC;
 
 
-5-- What is the distribution of readmissions by insulin therapy type (Up, Down, Steady, None)?--
- -- Identify readmission risk by Inaulin therapy
-    
--- Insulin therapy vs readmission--
+-- =========================================
+-- Section: Readmission by Insulin Therapy Type
+-- Description: Examine readmission patterns based on insulin therapy type (Up, Down, Steady, None)
+-- Purpose: Determine which therapy type is associated with higher readmission risk
+-- =========================================
 
 SELECT
     insulin,
@@ -79,6 +84,7 @@ SELECT
 FROM diabetes_clean
 GROUP BY insulin
 ORDER BY Readmit_Rate_Percent DESC;
+
 
 
 
