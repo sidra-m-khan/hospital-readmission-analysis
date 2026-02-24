@@ -101,8 +101,6 @@ Performed in `03_business_analysis.sql`.
 > 
 <img width="1920" height="1020" alt="readmission_dashboard png" src="https://github.com/user-attachments/assets/61d9069f-e890-4cee-a144-632260a042d0" />
 
-![Readmission Dashboard](images/readmission_dashboard.png)
-
 
 ## 📁 Project Structure
 
